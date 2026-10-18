@@ -3,109 +3,642 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Warm Atmosphere — Weather</title>
+  <title>Atmosphere — Weather Forecast</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0e051d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="https://openweathermap.org/img/wn/02n@4x.png">
+
+  <!-- Google Fonts for Modern Styling -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-cream: #F8F4EE;
-      --surface-card: #FFFDF9;
-      --terracotta: #C85A32;
-      --text-main: #2D231F;
-      --text-muted: #726259;
-      --border-warm: #E6DCD1;
+      --bg-gradient: linear-gradient(135deg, #0e051d 0%, #1a0a30 50%, #070210 100%);
+      --surface-glass: rgba(25, 12, 45, 0.45);
+      --surface-glass-glow: rgba(43, 23, 76, 0.6);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(157, 78, 221, 0.4);
+      --text-glow: #e0aaff;
+      --accent-purple: #9d4edd;
+      --accent-neon: #3c096c;
+      --text-main: #FFFFFF;
+      --text-muted: #a5a2b1;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      font-family: sans-serif;
-      background-color: var(--bg-cream);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
       color: var(--text-main);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      padding: 1rem;
+      padding: 1.5rem;
+      overflow-x: hidden;
     }
+
+    /* Cosmic visual atmospheric background overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 10%;
+      left: 15%;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(157, 78, 221, 0.15) 0%, transparent 70%);
+      filter: blur(80px);
+      z-index: -1;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: 10%;
+      right: 15%;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(60, 9, 108, 0.25) 0%, transparent 70%);
+      filter: blur(100px);
+      z-index: -1;
+    }
+
     .app-wrapper {
       width: 100%;
-      max-width: 400px;
+      max-width: 1200px;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
     }
-    h1 { text-align: center; font-size: 1.8rem; }
+
+    /* Top Navigation bar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #FFFFFF, var(--text-glow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    /* Search Bar with Glassmorphism effects */
     .search-card {
       display: flex;
       gap: 0.5rem;
+      width: 100%;
+      max-width: 400px;
     }
+
     .search-input {
       flex: 1;
-      padding: 0.8rem;
-      border: 1px solid var(--border-warm);
-      border-radius: 8px;
-      font-size: 1rem;
+      background: var(--surface-glass);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: var(--text-main);
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
     }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.7;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--border-active);
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.2);
+    }
+
     .search-btn {
-      background-color: var(--terracotta);
+      background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-neon) 100%);
       color: white;
-      border: none;
-      padding: 0.8rem 1.2rem;
-      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.75rem 1.4rem;
+      border-radius: 12px;
+      font-weight: 600;
       cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(157, 78, 221, 0.3);
+    }
+
+    .search-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(157, 78, 221, 0.4);
+    }
+
+    /* 3-Column Glassmorphic Layout */
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .grid-layout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 1.1fr 1fr 0.9fr;
+      }
+    }
+
+    /* Panels & Card Styling */
+    .dashboard-panel {
+      background: var(--surface-glass);
+      border: 1px solid var(--border-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* LEFT PANEL: Current Weather View */
+    .current-weather-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1rem 0;
+    }
+
+    .location-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .country-tag {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .temp-display-large {
+      font-size: 4.5rem;
+      font-weight: 700;
+      margin: 1rem 0 0.5rem 0;
+      background: linear-gradient(180deg, #FFFFFF 0%, #d6c5f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+
+    .weather-condition {
+      font-size: 1.1rem;
+      color: var(--text-glow);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+
+    .weather-hero-icon {
+      width: 130px;
+      height: 130px;
+      filter: drop-shadow(0 0 15px rgba(255,255,255,0.15)) drop-shadow(0 10px 25px rgba(157, 78, 221, 0.3));
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Horizontal list slider mock elements */
+    .hourly-forecast-track {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      padding: 0.5rem 0;
+      scrollbar-width: none;
+    }
+
+    .hourly-forecast-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .hourly-pill {
+      flex: 0 0 65px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 0.8rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .hourly-pill.active {
+      background: rgba(157, 78, 221, 0.2);
+      border: 1px solid rgba(157, 78, 221, 0.3);
+    }
+
+    .hourly-pill span {
+      color: var(--text-muted);
+    }
+    
+    .hourly-pill.active span {
+      color: var(--text-glow);
+      font-weight: 600;
+    }
+
+    .hourly-icon {
+      width: 26px;
+      height: 26px;
+    }
+
+    /* MIDDLE PANEL: Next Forecast View (Vertical mockups) */
+    .forecast-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .forecast-row-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      padding: 1rem 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease;
+    }
+
+    .forecast-row-card:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .forecast-date-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .forecast-day {
+      font-weight: 600;
       font-size: 1rem;
     }
-    .weather-card {
-      background: var(--surface-card);
-      border: 1px solid var(--border-warm);
-      border-radius: 20px;
-      padding: 2rem;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+
+    .forecast-date {
+      font-size: 0.78rem;
+      color: var(--text-muted);
     }
-    .temp-display {
-      font-size: 4rem;
-      font-weight: bold;
-      margin: 1rem 0;
+
+    .forecast-temp {
+      font-size: 1.4rem;
+      font-weight: 700;
     }
-    .weather-icon { width: 100px; }
-    .error-card {
-      background: #FBEBE8;
-      color: #962D1D;
+
+    .forecast-icon {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+    }
+
+    /* RIGHT PANEL: Location card design and live analytics features */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
       padding: 1rem;
-      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .metric-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+    }
+
+    /* Simulated locations layout cards */
+    .explore-locations {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .city-preview-card {
+      background: linear-gradient(135deg, rgba(32, 18, 56, 0.6) 0%, rgba(13, 6, 26, 0.6) 100%);
+      border: 1px solid var(--border-glass);
+      border-radius: 16px;
+      padding: 0.9rem 1.1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .city-details h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .city-details p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .city-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .city-preview-temp {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .error-card {
+      background: rgba(150, 45, 29, 0.15);
+      border: 1px solid rgba(150, 45, 29, 0.35);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: #ff9e9e;
+      padding: 1.25rem;
+      border-radius: 20px;
       text-align: center;
+      font-size: 0.95rem;
+    }
+
+    /* Custom CSS transitions/scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
     }
   </style>
 </head>
 <body>
 
   <main class="app-wrapper">
-    <h1>Atmosphere</h1>
-
-    <form class="search-card" method="get">
-      <input 
-        type="text" 
-        name="city" 
-        class="search-input" 
-        placeholder="Enter city name..." 
-        value="{% if weather.city %}{{ weather.city }}{% else %}{{ city }}{% endif %}"
-        required
-      />
-      <button type="submit" class="search-btn">Search</button>
-    </form>
+    <!-- Header with Search Form -->
+    <header>
+      <h1>Atmosphere</h1>
+      <form class="search-card" method="get">
+        <input 
+          type="text" 
+          name="city" 
+          class="search-input" 
+          placeholder="Search city (e.g. Manila)..." 
+          value="{% if weather.city %}{{ weather.city }}{% else %}{{ city }}{% endif %}"
+          required
+        />
+        <button type="submit" class="search-btn">Search</button>
+      </form>
+    </header>
 
     {% if weather.error %}
-      <div class="error-card">{{ weather.error }}</div>
+      <div class="error-card">
+        <strong>Error:</strong> {{ weather.error }}
+      </div>
     {% else %}
-      <section class="weather-card">
-        <h2>{{ weather.city }}, {{ weather.country }}</h2>
-        <img class="weather-icon" src="https://openweathermap.org/img/wn/{{ weather.icon }}@4x.png" alt="icon" />
-        <div class="temp-display">{{ weather.temp }}°C</div>
-        <p>{{ weather.description }}</p>
-        <p style="margin-top: 1rem; color: var(--text-muted);">
-          Humidity: {{ weather.humidity }}% | Wind: {{ weather.wind_speed }} km/h
-        </p>
+      
+      <!-- Responsive Dashboard Core -->
+      <section class="grid-layout">
+        
+        <!-- COLUMN 1: Live Current Status -->
+        <div class="dashboard-panel">
+          <div class="panel-title">
+            <span>Current Weather</span>
+            <span style="font-size: 0.8rem; opacity: 0.6;">LIVE</span>
+          </div>
+
+          <div class="current-weather-hero">
+            <h2 class="location-name">{{ weather.city }}</h2>
+            <span class="country-tag">{{ weather.country }}</span>
+            
+            <img class="weather-hero-icon" 
+                 src="https://openweathermap.org/img/wn/{{ weather.icon }}@4x.png" 
+                 alt="Weather condition Icon" />
+            
+            <div class="temp-display-large">{{ weather.temp }}°C</div>
+            <p class="weather-condition">{{ weather.description }}</p>
+          </div>
+
+          <!-- Bottom Mock Slider to support mockup design -->
+          <div>
+            <div class="panel-title" style="font-size: 0.85rem; margin-bottom: 0.6rem;">
+              <span>Hourly Forecast</span>
+            </div>
+            <div class="hourly-forecast-track">
+              <div class="hourly-pill">
+                <span>01:00</span>
+                <img class="hourly-icon" src="https://openweathermap.org/img/wn/04n.png" alt="icon" />
+                <strong>18°</strong>
+              </div>
+              <div class="hourly-pill active">
+                <span>Now</span>
+                <img class="hourly-icon" src="https://openweathermap.org/img/wn/{{ weather.icon }}.png" alt="icon" />
+                <strong>{{ weather.temp }}°</strong>
+              </div>
+              <div class="hourly-pill">
+                <span>03:00</span>
+                <img class="hourly-icon" src="https://openweathermap.org/img/wn/04d.png" alt="icon" />
+                <strong>17°</strong>
+              </div>
+              <div class="hourly-pill">
+                <span>04:00</span>
+                <img class="hourly-icon" src="https://openweathermap.org/img/wn/09d.png" alt="icon" />
+                <strong>18°</strong>
+              </div>
+              <div class="hourly-pill">
+                <span>05:00</span>
+                <img class="hourly-icon" src="https://openweathermap.org/img/wn/09d.png" alt="icon" />
+                <strong>19°</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMN 2: Next Forecast (Atmospheric Lists Mockups) -->
+        <div class="dashboard-panel">
+          <div class="panel-title">
+            <span>Forecast Report</span>
+            <span style="font-size: 0.8rem; color: var(--text-glow); font-weight: 500;">Next 4 Days</span>
+          </div>
+
+          <div class="forecast-list">
+            <div class="forecast-row-card">
+              <div class="forecast-date-group">
+                <span class="forecast-day">Friday</span>
+                <span class="forecast-date">March 02</span>
+              </div>
+              <span class="forecast-temp">17°</span>
+              <img class="forecast-icon" src="https://openweathermap.org/img/wn/09d.png" alt="Forecast icon" />
+            </div>
+
+            <div class="forecast-row-card">
+              <div class="forecast-date-group">
+                <span class="forecast-day">Saturday</span>
+                <span class="forecast-date">March 03</span>
+              </div>
+              <span class="forecast-temp">19°</span>
+              <img class="forecast-icon" src="https://openweathermap.org/img/wn/50d.png" alt="Forecast icon" />
+            </div>
+
+            <div class="forecast-row-card">
+              <div class="forecast-date-group">
+                <span class="forecast-day">Sunday</span>
+                <span class="forecast-date">March 04</span>
+              </div>
+              <span class="forecast-temp">16°</span>
+              <img class="forecast-icon" src="https://openweathermap.org/img/wn/11d.png" alt="Forecast icon" />
+            </div>
+
+            <div class="forecast-row-card">
+              <div class="forecast-date-group">
+                <span class="forecast-day">Monday</span>
+                <span class="forecast-date">March 05</span>
+              </div>
+              <span class="forecast-temp">16°</span>
+              <img class="forecast-icon" src="https://openweathermap.org/img/wn/11d.png" alt="Forecast icon" />
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMN 3: Live Details & Quick Cards -->
+        <div class="dashboard-panel">
+          <div class="panel-title">
+            <span>Details</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Real-time</span>
+          </div>
+
+          <!-- Dynamic API Indicators -->
+          <div class="metric-grid">
+            <div class="metric-card">
+              <span class="metric-label">Humidity</span>
+              <span class="metric-val">{{ weather.humidity }}%</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Wind Speed</span>
+              <span class="metric-val">{{ weather.wind_speed }} km/h</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Feels Like</span>
+              <span class="metric-val">{{ weather.feels_like }}°C</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Status</span>
+              <span class="metric-val" style="font-size: 0.95rem; color: var(--text-glow);">Comfort</span>
+            </div>
+          </div>
+
+          <div class="panel-title" style="margin-top: 0.5rem;">
+            <span>Pick Location</span>
+          </div>
+
+          <!-- Stylized Quick preview lists cards -->
+          <div class="explore-locations">
+            <div class="city-preview-card">
+              <div class="city-details">
+                <h4>Montreal</h4>
+                <p>Canada</p>
+              </div>
+              <div class="city-stats">
+                <span class="city-preview-temp">8°C</span>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/13d.png" alt="status icon" />
+              </div>
+            </div>
+
+            <div class="city-preview-card">
+              <div class="city-details">
+                <h4>Tokyo</h4>
+                <p>Japan</p>
+              </div>
+              <div class="city-stats">
+                <span class="city-preview-temp">12°C</span>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/11d.png" alt="status icon" />
+              </div>
+            </div>
+
+            <div class="city-preview-card">
+              <div class="city-details">
+                <h4>Taipei</h4>
+                <p>Taiwan</p>
+              </div>
+              <div class="city-stats">
+                <span class="city-preview-temp">20°C</span>
+                <img class="forecast-icon" src="https://openweathermap.org/img/wn/09d.png" alt="status icon" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </section>
+
     {% endif %}
   </main>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Atmosphere PWA active. Scope:', reg.scope))
+          .catch(err => console.error('PWA registration failed:', err));
+      });
+    }
+  </script>
 </body>
 </html>
