@@ -12,8 +12,15 @@ def weather_view(request):
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     weather_data = {}
 
+    # PythonAnywhere free account proxy configuration
+    proxies = {
+        "http": "http://proxy.server:3128",
+        "https": "http://proxy.server:3128",
+    }
+
     try:
-        response = requests.get(url, timeout=10)
+        # Added the proxy parameter to bypass the outbound firewall
+        response = requests.get(url, timeout=10, proxies=proxies)
         
         if response.status_code == 404:
             weather_data = {"error": f"City '{city}' not found."}
